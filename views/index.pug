@@ -11,24 +11,25 @@ block content
 		.d-flex.justify-content-between.m-0
 			.buttons-sidebar.mr-2
 				.d-flex.flex-wrap.justify-content-center.my-3
-					+button("green", "far",  "fa-save")
+					+button("green", "far",  "fa-save", "saveAsImage()")
 					+button("darkorange", "fas",  "fa-bars")
 					+button("darkorange", "far",  "fa-copy")
 					+button("darkorange", "fas",  "fa-share-alt")
+					+button("red", "fas",  "fa-times", "clearCanvas()")
 					+divider
 					+button("sandybrown", "fas",  "fa-pencil-alt")
 					+button("sandybrown", "fas",  "fa-pen")
 					+colorPicker("sandybrown", "fas",  "fa-palette")
 					+button("sandybrown", "fas",  "fa-eraser")
-					+button("sandybrown", "fas",  "fa-shapes")
+					+button("sandybrown", "fas",  "fa-shapes", "addShape()")
 					+button("sandybrown", "far",  "fa-smile")
-					+button("sandybrown", "far",  "fa-images")
+					+button("sandybrown", "far",  "fa-images", "addImage()")
 					+button("sandybrown", "fas",  "fa-crop-alt")
-					+button("sandybrown", "fas",  "fa-undo-alt")
-					+button("sandybrown", "fas",  "fa-redo-alt")
+					+button("sandybrown", "fas",  "fa-undo-alt", "undo()")
+					+button("sandybrown", "fas",  "fa-redo-alt", "redo()")
 					+button("sandybrown", "fas",  "fa-microphone")
 					+button("sandybrown", "fas",  "fa-microphone-slash")
-					+button("darkorange", "fas", "fa-play", "addShape", true)
+					+button("darkorange", "fas", "fa-play", "addShape()", true)
 
 				
 			.canvas.flex-grow-1.bg-white
