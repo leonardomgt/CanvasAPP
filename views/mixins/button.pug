@@ -1,10 +1,11 @@
-mixin button(type, style, color)
+mixin button(type, style, color, doublew=false)
 	style(type='text/css').
 		.btn-box {
 			border: 1px solid lightgrey;
 			border-radius: 26px;
 		}
-	.btn-box(style='width:53px; height:53px; background-color: ' + color + '; ')
+	- var widthStyle = doublew ? 'width:113px;' : 'width:53px;'
+	.btn-box(style= widthStyle + ' height:53px; background-color: ' + color + '; ')
 		div.h-100.w-100.d-flex.justify-content-center.align-items-center
 			i.text-white(class=type + ' ' + style style="font-size: .8em")
 		
