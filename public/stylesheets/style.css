@@ -1,0 +1,34 @@
+body {
+	font: 34px "Lucida Grande", Helvetica, Arial, sans-serif;
+	background-color: var(--main-bg-color);
+}
+
+:root {
+
+	/* Color pallete */
+
+	--main-bg-color: skyblue;
+	--second-bg-color: powderblue;
+	--main-txt-color: white;
+
+	/* Size values */
+	--canvas-border-radius: 12px;
+}
+
+.w-90 {
+	width: 90%!important;
+}
+
+.buttons-sidebar {
+	--sidebar-width: 11%;
+
+	background-color: var(--second-bg-color);
+	border-radius: var(--canvas-border-radius);
+
+	flex: 0 0 var(--sidebar-width);
+    max-width: var(--sidebar-width);
+}
+
+.canvas {
+	border-radius: var(--canvas-border-radius);
+}

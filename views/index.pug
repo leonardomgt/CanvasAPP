@@ -1,0 +1,35 @@
+extends layout
+include ./mixins/button.pug
+include ./mixins/divider.pug
+
+block headers
+	
+
+block content
+	.w-90.mx-auto.my-5
+		.d-flex.justify-content-between.m-0
+			.buttons-sidebar.mr-2
+				.d-flex.flex-wrap.justify-content-center.my-3
+					.m-1: +button("far", "fa-save", "green")
+					.m-1: +button("fas", "fa-bars", "darkorange")
+					.m-1: +button("far", "fa-copy", "darkorange")
+					.m-1: +button("fas", "fa-share-alt", "darkorange")
+					+divider
+					.m-1: +button("fas", "fa-pencil-alt", "sandybrown")
+					.m-1: +button("fas", "fa-pen", "sandybrown")
+					.m-1: +button("fas", "fa-palette", "sandybrown")
+					.m-1: +button("fas", "fa-eraser", "sandybrown")
+					.m-1: +button("far", "fa-hand-pointer", "sandybrown")
+					.m-1: +button("far", "fa-smile", "sandybrown")
+					.m-1: +button("far", "fa-images", "sandybrown")
+					.m-1: +button("fas", "fa-crop-alt", "sandybrown")
+					.m-1: +button("fas", "fa-undo-alt", "sandybrown")
+					.m-1: +button("fas", "fa-redo-alt", "sandybrown")
+					.m-1: +button("fas", "fa-microphone", "sandybrown")
+					.m-1: +button("fas", "fa-microphone-slash", "sandybrown")
+
+
+				
+			.canvas.flex-grow-1.bg-white
+				
+		
