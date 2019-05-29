@@ -1,74 +1,53 @@
 var canvas = new fabric.Canvas("canvasapp", { width: 1086, height: 600 });
-var current;
-var list = [];
 var state = [];
-var index = 0;
-var index2 = 0;
-var action = false;
-var refresh = true;
-
-canvas.on("object:added", function (e) {
-    var object = e.target;
-
-    if (action === true) {
-        state = [state[index2]];
-        list = [list[index2]];
-
-        action = false;
-        index = 1;
-		}
-		
-    object.saveState();
-    state[index] = JSON.stringify(object.originalState);
-    list[index] = object;
-    index++;
-    index2 = index - 1;
-    
-    refresh = true;
+var currentState = 0;
+state.push(JSON.stringify(canvas));
+canvas.on(
+    'object:modified', function () {
+    updateModifications(true);
+},
+    'object:added', function () {
+    updateModifications(true);
 });
 
-canvas.on("object:modified", function (e) {
-    var object = e.target;
-
-    if (action === true) {
-        state = [state[index2]];
-        list = [list[index2]];
-
-        action = false;
-        index = 1;
+function updateModifications(savehistory) {
+    if (savehistory === true) {
+				state = state.slice(0, currentState + 1);
+        myjson = JSON.stringify(canvas);
+				state.push(myjson);
+				currentState++;
     }
-
-    object.saveState();
-
-    state[index] = JSON.stringify(object.originalState);
-    list[index] = object;
-    index++;
-    index2 = index - 1;
-
-    refresh = true;
-});
+}
 
 function addShape() {
 	//addCircle();
 	//addRectangle();
-	addTriangle();
+	obj = addTriangle();
+	canvas.setActiveObject(obj);
 }
 
 function addCircle() {
 	canvas.add(new fabric.Circle({ radius: 30, fill: '#f55', top: 100, left: 100 }));
+	updateModifications(true);
 }
 
 function addRectangle() {
 	canvas.add(new fabric.Rect({ width: 60,	height: 60,	fill: '#f55', left: 100, top: 100 }));
+	updateModifications(true);
 }
 
 function addTriangle() {
-	canvas.add(new fabric.Triangle({ width: 60,	height: 60,	fill: '#f55', left: 100, top: 100 }));
+	obj = new fabric.Triangle({ width: 60,	height: 60,	fill: '#f55', left: 100, top: 100 });
+	canvas.add(obj);
+	updateModifications(true);
+	return obj;
 }
 
 function addImage() {
 	fabric.Image.fromURL('images/sonic.png', function(img){
 		canvas.add(img);
+		canvas.setActiveObject(img);
+		updateModifications(true);
 	});
 }
 
@@ -79,43 +58,52 @@ function saveAsImage() {
 }
 
 function clearCanvas() { 
-	canvas.clear();
+	canvas.clear().renderAll();
+	updateModifications(true);
 }
 
-function undo() { 
-	if (index <= 0) {
-		index = 0;
+function undo() {
+	if (currentState > 0) {
+			canvas.clear().renderAll();
+			canvas.loadFromJSON(state[--currentState]);
+			canvas.renderAll();
+	}
+}
+
+function redo() {
+	if (state.length -1 > currentState) {
+			canvas.clear().renderAll();
+			canvas.loadFromJSON(state[++currentState]);
+			canvas.renderAll();
+	}
+}
+
+function copyPaste() {
+	if(!canvas.getActiveObject()){
 		return;
-}
-
-if (refresh === true) {
-		index--;
-		refresh = false;
-}
-
-index2 = index - 1;
-current = list[index2];
-current.setOptions(JSON.parse(state[index2]));
-
-index--;
-current.setCoords();
-canvas.renderAll();
-action = true;
-}
-
-function redo() { 
-	action = true;
-    if (index >= state.length - 1) {
-        return;
-    }
-
-    index2 = index + 1;
-    current = list[index2];
-    current.setOptions(JSON.parse(state[index2]));
-
-    index++;
-    current.setCoords();
-    canvas.renderAll();
+	}
+	canvas.getActiveObject().clone(function(clonedObj) {
+		canvas.discardActiveObject();
+		clonedObj.set({
+			left: clonedObj.left + 10,
+			top: clonedObj.top + 10,
+			evented: true,
+		});
+		if (clonedObj.type === 'activeSelection') {
+			clonedObj.canvas = canvas;
+			clonedObj.forEachObject(function(obj) {
+				canvas.add(obj);
+			});
+			clonedObj.setCoords();
+		} else {
+			canvas.add(clonedObj);
+		}
+		clonedObj.top += 10;
+		clonedObj.left += 10;
+		canvas.setActiveObject(clonedObj);
+		canvas.requestRenderAll();
+		updateModifications(true);
+	});
 }
 
 function drawPencil() {
