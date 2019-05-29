@@ -1,0 +1,44 @@
+mixin colorPicker(color, type, style, onClick="addShape()", doublew=false)
+	- var widthStyle = doublew ? 'width:113px;' : 'width:53px;'
+	- var buttonID = type + '_' + style;
+	.m-1.btn-box(style= widthStyle + ' height:53px; background-color: ' + color + '; ' id=buttonID + '_box')
+		div.h-100.w-100.d-flex.justify-content-center.align-items-center(id=buttonID+"_btn")
+			i.text-white(class=type + ' ' + style style="font-size: .8em")
+		input.hidden(type="color" name="canvascolor" value="#ff0000")
+			
+
+	script.
+		$("##{buttonID}_btn").click(function(){
+			$("##{buttonID}_btn + input.hidden").focus();
+			$("##{buttonID}_btn + input.hidden").value = "#FFCC00";
+			$("##{buttonID}_btn + input.hidden").click();
+		});
+
+
+
+
+	style(type='text/css').
+
+		##{buttonID}_box {
+			border: 2px solid red;
+			border-radius: 26px;
+			cursor: pointer;
+			opacity: 0.9;
+		}
+
+		##{buttonID}_box:hover {
+			opacity: 1;
+		}
+
+
+		##{buttonID}_box .hidden {
+			position: absolute;
+			left: -10000px;
+			top: auto;
+			width: 1px;
+			height: 1px;
+			overflow: hidden;
+		}
+
+		
+		

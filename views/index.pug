@@ -1,6 +1,7 @@
 extends layout
 
 include ./mixins/button.pug
+include ./mixins/colorPicker.pug
 include ./mixins/divider.pug
 
 block headers
@@ -17,7 +18,7 @@ block content
 					+divider
 					+button("sandybrown", "fas",  "fa-pencil-alt")
 					+button("sandybrown", "fas",  "fa-pen")
-					+button("sandybrown", "fas",  "fa-palette")
+					+colorPicker("sandybrown", "fas",  "fa-palette")
 					+button("sandybrown", "fas",  "fa-eraser")
 					+button("sandybrown", "fas",  "fa-shapes")
 					+button("sandybrown", "far",  "fa-smile")
@@ -27,8 +28,7 @@ block content
 					+button("sandybrown", "fas",  "fa-redo-alt")
 					+button("sandybrown", "fas",  "fa-microphone")
 					+button("sandybrown", "fas",  "fa-microphone-slash")
-					+button("sandybrown", "fas", "fa-play", "sandybrown", true)
-
+					+button("darkorange", "fas", "fa-play", "addShape", true)
 
 				
 			.canvas.flex-grow-1.bg-white
