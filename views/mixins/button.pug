@@ -1,11 +1,16 @@
-mixin button(type, style, color, doublew=false)
+mixin button(color, type, style, onClick="addShape", doublew=false)
 	style(type='text/css').
 		.btn-box {
 			border: 1px solid lightgrey;
 			border-radius: 26px;
 		}
 	- var widthStyle = doublew ? 'width:113px;' : 'width:53px;'
-	.btn-box(style= widthStyle + ' height:53px; background-color: ' + color + '; ')
-		div.h-100.w-100.d-flex.justify-content-center.align-items-center
-			i.text-white(class=type + ' ' + style style="font-size: .8em")
+		.m-1.btn-box(style= widthStyle + ' height:53px; background-color: ' + color + '; ')
+			- var buttonID = type + '_' + style + '_button';
+			div.h-100.w-100.d-flex.justify-content-center.align-items-center(id=buttonID)
+				i.text-white(class=type + ' ' + style style="font-size: .8em")
+	script.
+		$("##{buttonID}").click(function(){
+			#{onClick}()
+		});
 		

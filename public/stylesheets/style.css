@@ -32,3 +32,8 @@ body {
 .canvas {
 	border-radius: var(--canvas-border-radius);
 }
+
+#canvasapp {
+	width: 100% !important;
+	height: 100% !important;
+}
