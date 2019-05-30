@@ -23,7 +23,7 @@ h1{
 }
 
 .buttons-sidebar {
-	--sidebar-width: 11%;
+	--sidebar-width: 18%;
 
 	background-color: var(--second-bg-color);
 	border-radius: var(--canvas-border-radius);
@@ -39,4 +39,13 @@ h1{
 #canvasapp {
 	width: 100% !important;
 	height: 100% !important;
+}
+
+.hidden {
+	position: absolute;
+	left: -10000px;
+	top: auto;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
 }

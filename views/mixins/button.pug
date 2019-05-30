@@ -1,9 +1,9 @@
 mixin button(color, type, style, onClick="addShape()", doublew=false)
-	- var widthStyle = doublew ? 'width:113px;' : 'width:53px;'
-		.m-1.btn-box(style= widthStyle + ' height:53px; background-color: ' + color + '; ')
-			- var buttonID = type + '_' + style + '_button';
-			div.h-100.w-100.d-flex.justify-content-center.align-items-center(id=buttonID)
-				i.text-white(class=type + ' ' + style style="font-size: .8em")
+	- var widthStyle = doublew ? 'width:115px;' : 'width:53px;'
+	.m-1.btn-box(style= widthStyle + ' height:53px; background-color: ' + color + '; ')
+		- var buttonID = type + '_' + style + '_button';
+		div.h-100.w-100.d-flex.justify-content-center.align-items-center(id=buttonID)
+			i.text-white(class=type + ' ' + style style="font-size: .8em")
 			
 
 	script.
@@ -17,7 +17,7 @@ mixin button(color, type, style, onClick="addShape()", doublew=false)
 			border: 1px solid lightgrey;
 			border-radius: 26px;
 			cursor: pointer;
-			opacity: 0.9;
+			opacity: 0.8;
 		}
 
 		.btn-box:hover {

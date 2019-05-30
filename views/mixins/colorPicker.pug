@@ -1,15 +1,9 @@
-mixin colorPicker(color, type, style, onClick="addShape()", doublew=false)
-	- var widthStyle = doublew ? 'width:113px;' : 'width:53px;'
-	.m-1.btn-box(style= widthStyle + ' height:53px; background-color: ' + color + '; ' id='colorPicker_box')
-		div.h-100.w-100.d-flex.justify-content-center.align-items-center(id="colorPicker_btn")
+mixin colorPicker(color, type, style)
+
+	.m-1.btn-box(style= 'width:53px; height:53px; background-color: ' + color + '; ' id='colorPicker_box')
+		#colorPicker_btn.h-100.w-100.d-flex.justify-content-center.align-items-center
 			i.text-white(class=type + ' ' + style style="font-size: .8em")
-		input.hidden(type="color" name="canvascolor")
-		
-
-	//- script.
-	
-
-			border: 3px solid red;
+		input#color-picker.hidden(type="color" name="canvascolor")
 
 	style(type='text/css').
 
@@ -22,16 +16,5 @@ mixin colorPicker(color, type, style, onClick="addShape()", doublew=false)
 		#colorPicker_box:hover {
 			opacity: 1;
 		}
-
-
-		#colorPicker_box .hidden {
-			position: absolute;
-			left: -10000px;
-			top: auto;
-			width: 1px;
-			height: 1px;
-			overflow: hidden;
-		}
-
 		
 		

@@ -3,6 +3,8 @@ extends layout
 include ./mixins/button.pug
 include ./mixins/colorPicker.pug
 include ./mixins/divider.pug
+include ./mixins/audioRecorder.pug
+include ./mixins/audioDisplay.pug
 
 block headers
 	
@@ -17,26 +19,28 @@ block content
 					+button("darkorange", "fas",  "fa-share-alt")
 					+button("red", "fas",  "fa-times", "clearCanvas()")
 					+divider
-					+button("sandybrown", "fas",  "fa-mouse-pointer", "cursor()")
-					+button("sandybrown", "fas",  "fa-pencil-alt", "drawingPencil()")
-					+button("sandybrown", "fas",  "fa-pen", "drawingPen()")
-					+colorPicker("sandybrown", "fas",  "fa-palette")
-					+button("sandybrown", "fas",  "fa-eraser", "drawingEraser()")
-					+button("sandybrown", "fas",  "fa-shapes", "addShape()")
-					+button("sandybrown", "far",  "fa-smile")
-					+button("sandybrown", "far",  "fa-images", "addImage()")
-					+button("sandybrown", "fas",  "fa-crop-alt")
-					+button("sandybrown", "fas",  "fa-undo-alt", "undo()")
-					+button("sandybrown", "fas",  "fa-redo-alt", "redo()")
-					+button("sandybrown", "fas",  "fa-microphone", "addShape('triangle')")
-					+button("sandybrown", "fas",  "fa-microphone-slash", "addShape('circle')")
-					+button("darkorange", "fas", "fa-play", "addShape()", true)
-
+					+button("orange", "fas",  "fa-mouse-pointer", "cursor()")
+					+button("orange", "fas",  "fa-pencil-alt", "drawingPencil()")
+					+button("orange", "fas",  "fa-pen", "drawingPen()")
+					+colorPicker("orange", "fas",  "fa-palette")
+					+button("orange", "fas",  "fa-eraser", "drawingEraser()")
+					+button("orange", "fas",  "fa-shapes", "addShape()")
+					+button("orange", "far",  "fa-smile")
+					+button("orange", "far",  "fa-images", "addImage()")
+					+button("orange", "fas",  "fa-crop-alt")
+					+button("orange", "fas",  "fa-undo-alt", "undo()")
+					+button("orange", "fas",  "fa-redo-alt", "redo()")
+					+audioRecorder("orange", "fas", "fa-music")
+					//- +button("orange", "fas",  "fa-microphone", "addShape('triangle')")
+					+button("orange", "fas",  "fa-microphone-slash", "addShape('circle')")
+					+button("darkorange", "fas", "fa-play", "playSound()", true)
 				
-			.canvas.flex-grow-1.bg-white
+			.canvas.flex-grow-1.bg-white(style="position: relative;")
 				canvas#canvasapp
-					script(src="javascripts/script.js")
-					
+				+audioDisplay
+block scripts
+	script(src="javascripts/script.js")
+						
 
 
 		

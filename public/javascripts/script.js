@@ -1,27 +1,66 @@
-var canvas = new fabric.Canvas("canvasapp", { width: 1550, height: 850, isDrawingMode: false });
+var canvas = new fabric.Canvas("canvasapp", { width: 750, height: 400, isDrawingMode: false });
 var state = [];
 var currentState = 0;
-var color = '#000000';
+var color = '#0000ff';
+var sound;
+
+// Create state 0
 state.push(JSON.stringify(canvas));
+
+
+// ==================================
+//           Manage color
+// ==================================
 
 $("#colorPicker_box").css('background-color', color);
 canvas.freeDrawingBrush.color = color;
 
-$("input.hidden").change(function () {
-	color = $("input.hidden")[0].value;
+$("input#color-picker").change(function () {
+	color = $("input#color-picker")[0].value;
+	
 	$("#colorPicker_box").css('background-color', color);
-
 	canvas.freeDrawingBrush.color = color;
 
 });
 
-
 $("#colorPicker_btn").click(function(){
-	$("#colorPicker_btn + input.hidden").focus();
-	$("#colorPicker_btn + input.hidden").val(color);
-	$("#colorPicker_btn + input.hidden").click();
+	$("input#color-picker").focus();
+	$("input#color-picker").click();
 });
 
+// ==================================
+//           Manage sound
+// ==================================
+
+$("#audio-rec-btn").click(function(){
+	$("input#recorder").focus();
+	$("input#recorder").click();
+});
+
+$("input#recorder").change(function() {
+	var file = $("input#recorder")[0].files[0];
+	sound = URL.createObjectURL(file);
+	$("audio#player")[0].src = sound;
+});
+
+
+function playSound() {
+	$("audio#player")[0].play()
+
+	$("#fas_fa-play_button i").removeClass("fa-play")
+	$("#fas_fa-play_button i").addClass("fa-pause")
+}
+
+function audioEnded() {
+	// alert('Audio ended')
+
+	$("#fas_fa-play_button i").removeClass("fa-pause")
+	$("#fas_fa-play_button i").addClass("fa-play")
+}
+
+// ==================================
+//     Manage canvas opperations
+// ==================================
 canvas.on(
 	'object:modified', function () {
 		updateModifications(true);
