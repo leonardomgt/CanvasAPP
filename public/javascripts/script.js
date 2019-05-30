@@ -25,7 +25,9 @@ $("#colorPicker_btn").click(function(){
 
 canvas.on(
 	'object:modified', function () {
+		if(!changingStates){
 		updateModifications();
+		}
 	});
 canvas.on(
 	'object:added', function () {
@@ -34,8 +36,6 @@ canvas.on(
 		}
 	});
 
-
-canvas.on("after:render", function(){ canvas.calcOffset() });
 
 function updateModifications() {
 		state = state.slice(0, currentState + 1);
@@ -66,6 +66,14 @@ function addShape(shape = 'rectangle') {
 
 function addImage() {
 	fabric.Image.fromURL('images/sonic.png', function (img) {
+		if(img.width > canvas.width || img.height > canvas.height){
+
+			const wFactor = img.width / canvas.width;
+			const hFactor = img.height / canvas.height;
+			const factor = Math.max(hFactor, wFactor);
+			img.scaleToWidth(img.width / factor);
+			img.scaleToHeight(img.height / factor);
+		}
 		canvas.add(img);
 		canvas.setActiveObject(img);
 	});
