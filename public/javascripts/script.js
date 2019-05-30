@@ -2,6 +2,7 @@ var canvas = new fabric.Canvas("canvasapp", { width: 1550, height: 850, isDrawin
 var state = [];
 var currentState = 0;
 var color = '#000000';
+var changingStates = false;
 state.push(JSON.stringify(canvas));
 
 $("#colorPicker_box").css('background-color', color);
@@ -24,23 +25,28 @@ $("#colorPicker_btn").click(function(){
 
 canvas.on(
 	'object:modified', function () {
-		updateModifications(true);
-	},
+		updateModifications();
+	});
+canvas.on(
 	'object:added', function () {
-		updateModifications(true);
+		if(!changingStates){
+		updateModifications();
+		}
 	});
 
-function updateModifications(savehistory) {
-	if (savehistory === true) {
+
+canvas.on("after:render", function(){ canvas.calcOffset() });
+
+function updateModifications() {
 		state = state.slice(0, currentState + 1);
 		myjson = JSON.stringify(canvas);
 		state.push(myjson);
 		currentState++;
-	}
+		console.log(state);
+		
 }
 
 function addShape(shape = 'rectangle') {
-	//addCircle();
 	switch (shape) {
 		case "circle":
 			obj = new fabric.Circle({ radius: 30, fill: color, top: 100, left: 100 });
@@ -54,7 +60,6 @@ function addShape(shape = 'rectangle') {
 			break;
 	}
 	canvas.add(obj);
-	updateModifications(true);
 	canvas.setActiveObject(obj);
 }
 
@@ -63,7 +68,6 @@ function addImage() {
 	fabric.Image.fromURL('images/sonic.png', function (img) {
 		canvas.add(img);
 		canvas.setActiveObject(img);
-		updateModifications(true);
 	});
 }
 
@@ -76,23 +80,27 @@ function saveAsImage() {
 function clearCanvas() {
 	canvas.clear().renderAll();
 	if (currentState > 0) {
-		updateModifications(true);
+		updateModifications()
 	}
 }
 
 function undo() {
 	if (currentState > 0) {
+		changingStates = true;
 		canvas.clear().renderAll();
 		canvas.loadFromJSON(state[--currentState]);
 		canvas.renderAll();
+		changingStates = false;
 	}
 }
 
 function redo() {
 	if (state.length - 1 > currentState) {
+		changingStates = true;
 		canvas.clear().renderAll();
 		canvas.loadFromJSON(state[++currentState]);
 		canvas.renderAll();
+		changingStates = false;
 	}
 }
 
@@ -120,7 +128,6 @@ function copyPaste() {
 		clonedObj.left += 10;
 		canvas.setActiveObject(clonedObj);
 		canvas.requestRenderAll();
-		updateModifications(true);
 	});
 }
 
@@ -130,11 +137,13 @@ function cursor() {
 
 function drawingPencil() {
 	canvas.isDrawingMode = true;
+	canvas.freeDrawingBrush.color = color;
 	canvas.freeDrawingBrush.width = 1;
 }
 
 function drawingPen() {
 	canvas.isDrawingMode = true;
+	canvas.freeDrawingBrush.color = color;
 	canvas.freeDrawingBrush.width = 30;
 }
 
