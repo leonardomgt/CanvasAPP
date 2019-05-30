@@ -1,12 +1,16 @@
+
 var canvas = new fabric.Canvas("canvasapp", { width: 750, height: 400, isDrawingMode: false });
+// var canvas = new fabric.Canvas("canvasapp", { width: 1550, height: 850, isDrawingMode: false });
+canvas.backgroundColor = "#FFFFFF";
 var state = [];
 var currentState = 0;
 var color = '#0000ff';
 var sound;
+var isSoundPlaying = false;
+var changingStates = false;
 
 // Create state 0
 state.push(JSON.stringify(canvas));
-
 
 // ==================================
 //           Manage color
@@ -17,13 +21,13 @@ canvas.freeDrawingBrush.color = color;
 
 $("input#color-picker").change(function () {
 	color = $("input#color-picker")[0].value;
-	
+
 	$("#colorPicker_box").css('background-color', color);
 	canvas.freeDrawingBrush.color = color;
 
 });
 
-$("#colorPicker_btn").click(function(){
+$("#colorPicker_btn").click(function () {
 	$("input#color-picker").focus();
 	$("input#color-picker").click();
 });
@@ -32,12 +36,12 @@ $("#colorPicker_btn").click(function(){
 //           Manage sound
 // ==================================
 
-$("#audio-rec-btn").click(function(){
+$("#audio-rec-btn").click(function () {
 	$("input#recorder").focus();
 	$("input#recorder").click();
 });
 
-$("input#recorder").change(function() {
+$("input#recorder").change(function () {
 	var file = $("input#recorder")[0].files[0];
 	sound = URL.createObjectURL(file);
 	$("audio#player")[0].src = sound;
@@ -45,10 +49,25 @@ $("input#recorder").change(function() {
 
 
 function playSound() {
-	$("audio#player")[0].play()
+	if (sound) {
+		if (!isSoundPlaying) {
 
-	$("#fas_fa-play_button i").removeClass("fa-play")
-	$("#fas_fa-play_button i").addClass("fa-pause")
+			$("audio#player")[0].play()
+			
+			$("#fas_fa-play_button i").removeClass("fa-play")
+			$("#fas_fa-play_button i").addClass("fa-pause")
+			
+			isSoundPlaying = true;
+		}
+		else {
+			$("audio#player")[0].pause()
+	
+			$("#fas_fa-play_button i").removeClass("fa-pause")
+			$("#fas_fa-play_button i").addClass("fa-play")
+			isSoundPlaying = false;
+
+		}
+	}
 }
 
 function audioEnded() {
@@ -56,30 +75,47 @@ function audioEnded() {
 
 	$("#fas_fa-play_button i").removeClass("fa-pause")
 	$("#fas_fa-play_button i").addClass("fa-play")
+	isSoundPlaying = false;
+
 }
 
 // ==================================
 //     Manage canvas opperations
 // ==================================
-canvas.on(
-	'object:modified', function () {
-		updateModifications(true);
-	},
-	'object:added', function () {
-		updateModifications(true);
-	});
-
-function updateModifications(savehistory) {
-	if (savehistory === true) {
-		state = state.slice(0, currentState + 1);
-		myjson = JSON.stringify(canvas);
-		state.push(myjson);
-		currentState++;
+canvas.on('object:modified', function () {
+	if (!changingStates) {
+		updateModifications();
 	}
+});
+
+canvas.on('object:added', function () {
+	if (!changingStates) {
+		updateModifications();
+	}
+});
+
+canvas.on('mouse:up', function (e) {
+	if (canvas.isDrawingMode && canvas._objects && canvas._objects.length > 0) {
+		var drawObj = canvas._objects[canvas._objects.length - 1];
+		drawObj.set('left', drawObj.left + canvas.freeDrawingBrush.width / 2.0);
+		drawObj.set('top', drawObj.top + canvas.freeDrawingBrush.width / 2.0);
+		drawObj.setCoords();
+		canvas.renderAll();
+	}
+});
+
+
+function updateModifications() {
+	state = state.slice(0, currentState + 1);
+	myjson = JSON.stringify(canvas);
+	state.push(myjson);
+	currentState++;
+	console.log(state);
+
 }
 
 function addShape(shape = 'rectangle') {
-	//addCircle();
+	canvas.isDrawingMode = false;
 	switch (shape) {
 		case "circle":
 			obj = new fabric.Circle({ radius: 30, fill: color, top: 100, left: 100 });
@@ -93,16 +129,23 @@ function addShape(shape = 'rectangle') {
 			break;
 	}
 	canvas.add(obj);
-	updateModifications(true);
 	canvas.setActiveObject(obj);
 }
 
 
 function addImage() {
+	canvas.isDrawingMode = false;
 	fabric.Image.fromURL('images/sonic.png', function (img) {
+		if (img.width > canvas.width || img.height > canvas.height) {
+
+			const wFactor = img.width / canvas.width;
+			const hFactor = img.height / canvas.height;
+			const factor = Math.max(hFactor, wFactor);
+			img.scaleToWidth(img.width / factor);
+			img.scaleToHeight(img.height / factor);
+		}
 		canvas.add(img);
 		canvas.setActiveObject(img);
-		updateModifications(true);
 	});
 }
 
@@ -115,23 +158,27 @@ function saveAsImage() {
 function clearCanvas() {
 	canvas.clear().renderAll();
 	if (currentState > 0) {
-		updateModifications(true);
+		updateModifications()
 	}
 }
 
 function undo() {
 	if (currentState > 0) {
+		changingStates = true;
 		canvas.clear().renderAll();
 		canvas.loadFromJSON(state[--currentState]);
 		canvas.renderAll();
+		changingStates = false;
 	}
 }
 
 function redo() {
 	if (state.length - 1 > currentState) {
+		changingStates = true;
 		canvas.clear().renderAll();
 		canvas.loadFromJSON(state[++currentState]);
 		canvas.renderAll();
+		changingStates = false;
 	}
 }
 
@@ -159,7 +206,6 @@ function copyPaste() {
 		clonedObj.left += 10;
 		canvas.setActiveObject(clonedObj);
 		canvas.requestRenderAll();
-		updateModifications(true);
 	});
 }
 
@@ -169,11 +215,13 @@ function cursor() {
 
 function drawingPencil() {
 	canvas.isDrawingMode = true;
+	canvas.freeDrawingBrush.color = color;
 	canvas.freeDrawingBrush.width = 1;
 }
 
 function drawingPen() {
 	canvas.isDrawingMode = true;
+	canvas.freeDrawingBrush.color = color;
 	canvas.freeDrawingBrush.width = 30;
 }
 
