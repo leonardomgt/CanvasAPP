@@ -1,4 +1,5 @@
 var canvas = new fabric.Canvas("canvasapp", { width: 1550, height: 850, isDrawingMode: false });
+canvas.backgroundColor = "#FFFFFF";
 var state = [];
 var currentState = 0;
 var color = '#000000';
@@ -47,6 +48,7 @@ function updateModifications() {
 }
 
 function addShape(shape = 'rectangle') {
+	canvas.isDrawingMode = false;
 	switch (shape) {
 		case "circle":
 			obj = new fabric.Circle({ radius: 30, fill: color, top: 100, left: 100 });
@@ -65,6 +67,7 @@ function addShape(shape = 'rectangle') {
 
 
 function addImage() {
+	canvas.isDrawingMode = false;
 	fabric.Image.fromURL('images/sonic.png', function (img) {
 		if(img.width > canvas.width || img.height > canvas.height){
 
