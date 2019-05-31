@@ -1,8 +1,9 @@
 
-var canvas = new fabric.Canvas("canvasapp", { 
-	width: $("#canvas-container").width(), 
-	height: $("#canvas-container").height(), 
-	isDrawingMode: false });
+var canvas = new fabric.Canvas("canvasapp", {
+	width: $("#canvas-container").width(),
+	height: $("#canvas-container").height(),
+	isDrawingMode: false
+});
 
 canvas.backgroundColor = "#ffffff";
 var state = [];
@@ -10,8 +11,24 @@ var currentState = 0;
 var color = '#0000ff';
 var sound;
 var isSoundPlaying = false;
+var isCanvasBeingRecorded = false;
 var changingStates = false;
 
+var canvasVideoChunks = [];
+
+const stream = $(".canvasapp").get(0).captureStream(); // grab our canvas MediaStream
+const rec = new MediaRecorder(stream); // init the recorder
+rec.ondataavailable = e => {
+	canvasVideoChunks.push(e.data);
+	console.log("ondataavailable");
+	console.log(canvasVideoChunks);
+}
+rec.onstop = e => exportVideo(new Blob(canvasVideoChunks, {type: 'video/mp4'}));
+
+fabric.util.requestAnimFrame(function render() {
+	canvas.renderAll();
+	fabric.util.requestAnimFrame(render);
+});
 // Create state 0
 state.push(JSON.stringify(canvas));
 
@@ -39,13 +56,13 @@ $("#colorPicker_btn").click(function () {
 //           Manage sound
 // ==================================
 
-$("#audio-rec-btn").click(function () {
-	$("input#recorder").focus();
-	$("input#recorder").click();
+$("#audio-loader-btn").click(function () {
+	$("input#audioLoader").focus();
+	$("input#audioLoader").click();
 });
 
-$("input#recorder").change(function () {
-	var file = $("input#recorder")[0].files[0];
+$("input#audioLoader").change(function () {
+	var file = $("input#audioLoader")[0].files[0];
 	sound = URL.createObjectURL(file);
 	$("audio#player")[0].src = sound;
 });
@@ -56,15 +73,15 @@ function playSound() {
 		if (!isSoundPlaying) {
 
 			$("audio#player")[0].play()
-			
+
 			$("#fas_fa-play_button i").removeClass("fa-play")
 			$("#fas_fa-play_button i").addClass("fa-pause")
-			
+
 			isSoundPlaying = true;
 		}
 		else {
 			$("audio#player")[0].pause()
-	
+
 			$("#fas_fa-play_button i").removeClass("fa-pause")
 			$("#fas_fa-play_button i").addClass("fa-play")
 			isSoundPlaying = false;
@@ -85,78 +102,112 @@ function audioEnded() {
 
 
 // ==================================
-//         Manage image load
+//     Manage image/video load
 // ==================================
 
 
-$("#image-loader-btn").click(function () {
-	$("input#imageLoader").focus();
-	$("input#imageLoader").click();
+$("#file-loader-btn").click(function () {
+	console.log("click");
+
+	$("input#fileLoader").focus();
+	$("input#fileLoader").click();
 });
 
-$("input#imageLoader").change(function () {
-	var file = $("input#imageLoader")[0].files[0];
-	// $("audio#player")[0].src = sound;
-	addImage(URL.createObjectURL(file))
-});
+$("input#fileLoader").change(function () {
+	var file = $("input#fileLoader")[0].files[0];
 
+	console.log("file");
+	console.log(file.type);
 
-// ==================================
-//     Manage canvas opperations
-// ==================================
-
-canvas.on('object:modified', function () {
-	if (!changingStates) {
-		updateModifications();
+	switch (file.type.substr(0, file.type.indexOf('/'))) {
+		case "image":
+			addImage(URL.createObjectURL(file))
+			break;
+		default:
+		case "video":
+			addVideo(URL.createObjectURL(file))
+			break;
 	}
 });
 
-canvas.on('object:added', function () {
-	if (!changingStates) {
-		updateModifications();
-	}
-});
+function createVideoElement(url) {
+	var videoE = document.createElement('video');
+	videoE.muted = true;
+	videoE.crossOrigin = "anonymous";
+	var source = document.createElement('source');
+	source.src = url;
+	source.type = 'video/webm';
+	videoE.appendChild(source);
 
-canvas.on('mouse:up', function (e) {
-	if (canvas.isDrawingMode && canvas._objects && canvas._objects.length > 0) {
-		var drawObj = canvas._objects[canvas._objects.length - 1];
-		drawObj.set('left', drawObj.left + canvas.freeDrawingBrush.width / 2.0);
-		drawObj.set('top', drawObj.top + canvas.freeDrawingBrush.width / 2.0);
-		drawObj.selectable = false; 
-		drawObj.hoverCursor = 'inherit';
-		drawObj.setCoords();
-		canvas.renderAll();
-		console.log(drawObj);
-		
-	}
-});
+	return videoE;
+}
 
 
-function updateModifications() {
-	state = state.slice(0, currentState + 1);
-	myjson = JSON.stringify(canvas);
-	state.push(myjson);
-	currentState++;
-	console.log(state);
+function addVideo(url) {
+	var videoE = createVideoElement(url);
+	videoE.addEventListener('loadedmetadata', function (e) {
+		videoE.width = videoE.videoWidth;
+		videoE.height = videoE.videoHeight;
+
+		var fab_video = new fabric.Image(videoE, { left: 0, top: 0 });
+
+		canvas.add(fab_video);
+		fab_video.getElement().play();
+
+	});
 
 }
 
-function addShape(shape = 'rectangle') {
-	canvas.isDrawingMode = false;
-	switch (shape) {
-		case "circle":
-			obj = new fabric.Circle({ radius: 30, fill: color, top: 100, left: 100 });
-			break;
-		case "triangle":
-			obj = new fabric.Triangle({ width: 60, height: 60, fill: color, left: 100, top: 100 });
-			break;
-		default:
-		case "rectangle":
-			obj = new fabric.Rect({ width: 60, height: 60, fill: color, left: 100, top: 100 });
-			break;
+function recordCanvas() {
+	if (!isCanvasBeingRecorded) {
+		isCanvasBeingRecorded = true;
+
+		$("#fas_fa-video_button i").removeClass("fa-video")
+		$("#fas_fa-video_button i").addClass("fa-video-slash")
+
+		$("#fas_fa-video_box").css('background-color', 'red');
+		
+		startRecording()
 	}
-	canvas.add(obj);
-	canvas.setActiveObject(obj);
+	else {
+		isCanvasBeingRecorded = false;
+
+		$("#fas_fa-video_button i").removeClass("fa-video-slash")
+		$("#fas_fa-video_button i").addClass("fa-video")
+		
+		$("#fas_fa-video_box").css('background-color', 'orange');
+		
+		stopRecording()
+	}
+}
+
+function startRecording() {
+	canvasVideoChunks = [];
+
+	rec.start();
+}
+
+function stopRecording() {
+	rec.stop();	
+}
+
+function exportVideo(blob) {
+
+	const recordedCanvas = $('video#recordedCanvas').get(0);
+
+	recordedCanvas.src = URL.createObjectURL(blob);
+
+	const linkToDownload = $("#downloadRecordedCanvas").get(0);
+
+	linkToDownload.href = recordedCanvas.src;
+
+}
+
+function saveAsVideo() {
+	// $("#downloadRecordedCanvas").focus();
+	console.log($("#downloadRecordedCanvas"));
+	
+	$("#downloadRecordedCanvas")[0].click();
 }
 
 
@@ -181,6 +232,67 @@ function saveAsImage() {
 		saveAs(blob, "myImage.png");
 	});
 }
+
+// ==================================
+//     Manage canvas opperations
+// ==================================
+function addCanvasState() {
+	if (!changingStates) {
+		updateModifications();
+	}
+}
+canvas.on('object:added', updateModifications);
+canvas.on('object:removed', updateModifications);
+canvas.on('object:modified', updateModifications);
+
+canvas.on('object:selected', function (obj) {
+	obj.target.bringToFront();
+});
+
+// Fabric JS Drawing Offset Error - Remove this code when the bug is resolved
+canvas.on('mouse:up', function (e) {
+	if (canvas.isDrawingMode && canvas._objects && canvas._objects.length > 0) {
+		var drawObj = canvas._objects[canvas._objects.length - 1];
+		drawObj.set('left', drawObj.left + canvas.freeDrawingBrush.width / 2.0);
+		drawObj.set('top', drawObj.top + canvas.freeDrawingBrush.width / 2.0);
+		drawObj.selectable = false;
+		drawObj.hoverCursor = 'inherit';
+		drawObj.setCoords();
+		canvas.renderAll();
+	}
+});
+
+
+function updateModifications() {
+	if (!changingStates) {
+		state = state.slice(0, currentState + 1);
+		myjson = JSON.stringify(canvas);
+		state.push(myjson);
+		currentState++;
+		console.log(state);
+	}
+
+}
+
+function addShape(shape = 'rectangle') {
+	canvas.isDrawingMode = false;
+	switch (shape) {
+		case "circle":
+			obj = new fabric.Circle({ radius: 30, fill: color, top: 100, left: 100 });
+			break;
+		case "triangle":
+			obj = new fabric.Triangle({ width: 60, height: 60, fill: color, left: 100, top: 100 });
+			break;
+		default:
+		case "rectangle":
+			obj = new fabric.Rect({ width: 60, height: 60, fill: color, left: 100, top: 100 });
+			break;
+	}
+	canvas.add(obj);
+	canvas.setActiveObject(obj);
+}
+
+
 
 function clearCanvas() {
 	canvas.clear().renderAll();
@@ -207,6 +319,14 @@ function redo() {
 		canvas.renderAll();
 		changingStates = false;
 	}
+}
+
+function deleteObject() {
+	if (!canvas.getActiveObject()) {
+		return;
+	}
+
+	canvas.remove(canvas.getActiveObject());
 }
 
 function copyPaste() {
@@ -243,13 +363,13 @@ function cursor() {
 function drawingPencil() {
 	canvas.isDrawingMode = true;
 	canvas.freeDrawingBrush.color = color;
-	canvas.freeDrawingBrush.width = 1;
+	canvas.freeDrawingBrush.width = 3;
 }
 
 function drawingPen() {
 	canvas.isDrawingMode = true;
 	canvas.freeDrawingBrush.color = color;
-	canvas.freeDrawingBrush.width = 30;
+	canvas.freeDrawingBrush.width = 10;
 }
 
 function drawingEraser() {

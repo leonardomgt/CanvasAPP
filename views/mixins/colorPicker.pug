@@ -1,6 +1,6 @@
 mixin colorPicker(color, type, style)
 
-	.m-1.btn-box(style= 'width:53px; height:53px; background-color: ' + color + '; ' id='colorPicker_box')
+	#colorPicker_box.m-1.btn-box(style= 'width:53px; height:53px; background-color: ' + color + '; ')
 		#colorPicker_btn.h-100.w-100.d-flex.justify-content-center.align-items-center
 			i.text-white(class=type + ' ' + style style="font-size: .8em")
 		input#color-picker.hidden(type="color" name="canvascolor")

@@ -23,7 +23,7 @@ h1{
 }
 
 .buttons-sidebar {
-	--sidebar-width: 18%;
+	--sidebar-width: 19%;
 
 	background-color: var(--second-bg-color);
 	border-radius: var(--canvas-border-radius);

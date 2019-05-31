@@ -1,13 +1,13 @@
 mixin button(color, type, style, onClick="addShape()", doublew=false)
 	- var widthStyle = doublew ? 'width:115px;' : 'width:53px;'
-	.m-1.btn-box(style= widthStyle + ' height:53px; background-color: ' + color + '; ')
-		- var buttonID = type + '_' + style + '_button';
-		div.h-100.w-100.d-flex.justify-content-center.align-items-center(id=buttonID)
+	- var buttonID = type + '_' + style;
+	.m-1.btn-box(style= widthStyle + ' height:53px; background-color: ' + color + '; ' id=buttonID + '_box')
+		div.h-100.w-100.d-flex.justify-content-center.align-items-center(id=buttonID + '_button')
 			i.text-white(class=type + ' ' + style style="font-size: .8em")
 			
 
 	script.
-		$("##{buttonID}").click(function(){
+		$("##{buttonID}_button").click(function(){
 			#{onClick}
 		});
 
