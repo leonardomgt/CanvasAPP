@@ -1,7 +1,10 @@
 
-var canvas = new fabric.Canvas("canvasapp", { width: 750, height: 400, isDrawingMode: false });
-// var canvas = new fabric.Canvas("canvasapp", { width: 1550, height: 850, isDrawingMode: false });
-canvas.backgroundColor = "#FFFFFF";
+var canvas = new fabric.Canvas("canvasapp", { 
+	width: $("#canvas-container").width(), 
+	height: $("#canvas-container").height(), 
+	isDrawingMode: false });
+
+canvas.backgroundColor = "#ffffff";
 var state = [];
 var currentState = 0;
 var color = '#0000ff';
@@ -79,9 +82,29 @@ function audioEnded() {
 
 }
 
+
+
+// ==================================
+//         Manage image load
+// ==================================
+
+
+$("#image-loader-btn").click(function () {
+	$("input#imageLoader").focus();
+	$("input#imageLoader").click();
+});
+
+$("input#imageLoader").change(function () {
+	var file = $("input#imageLoader")[0].files[0];
+	// $("audio#player")[0].src = sound;
+	addImage(URL.createObjectURL(file))
+});
+
+
 // ==================================
 //     Manage canvas opperations
 // ==================================
+
 canvas.on('object:modified', function () {
 	if (!changingStates) {
 		updateModifications();
@@ -99,8 +122,12 @@ canvas.on('mouse:up', function (e) {
 		var drawObj = canvas._objects[canvas._objects.length - 1];
 		drawObj.set('left', drawObj.left + canvas.freeDrawingBrush.width / 2.0);
 		drawObj.set('top', drawObj.top + canvas.freeDrawingBrush.width / 2.0);
+		drawObj.selectable = false; 
+		drawObj.hoverCursor = 'inherit';
 		drawObj.setCoords();
 		canvas.renderAll();
+		console.log(drawObj);
+		
 	}
 });
 
@@ -133,9 +160,9 @@ function addShape(shape = 'rectangle') {
 }
 
 
-function addImage() {
+function addImage(url) {
 	canvas.isDrawingMode = false;
-	fabric.Image.fromURL('images/sonic.png', function (img) {
+	fabric.Image.fromURL(url, function (img) {
 		if (img.width > canvas.width || img.height > canvas.height) {
 
 			const wFactor = img.width / canvas.width;
@@ -150,7 +177,7 @@ function addImage() {
 }
 
 function saveAsImage() {
-	$("#canvasapp").get(0).toBlob(function (blob) {
+	$(".canvasapp").get(0).toBlob(function (blob) {
 		saveAs(blob, "myImage.png");
 	});
 }

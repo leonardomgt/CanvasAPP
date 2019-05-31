@@ -5,6 +5,7 @@ include ./mixins/colorPicker.pug
 include ./mixins/divider.pug
 include ./mixins/audioRecorder.pug
 include ./mixins/audioDisplay.pug
+include ./mixins/imageUpload.pug
 
 block headers
 	
@@ -26,7 +27,8 @@ block content
 					+button("orange", "fas",  "fa-eraser", "drawingEraser()")
 					+button("orange", "fas",  "fa-shapes", "addShape()")
 					+button("orange", "far",  "fa-smile")
-					+button("orange", "far",  "fa-images", "addImage()")
+					+imageUpload("orange", "far",  "fa-images")
+					+button("orange", "fas",  "fa-video")
 					+button("orange", "fas",  "fa-crop-alt")
 					+button("orange", "fas",  "fa-undo-alt", "undo()")
 					+button("orange", "fas",  "fa-redo-alt", "redo()")
@@ -35,8 +37,8 @@ block content
 					+button("orange", "fas",  "fa-microphone-slash", "addShape('circle')")
 					+button("darkorange", "fas", "fa-play", "playSound()", true)
 				
-			.canvas.flex-grow-1.bg-white(style="position: relative;")
-				canvas#canvasapp
+			#canvas-container.flex-grow-1.bg-white(style="position: relative;")
+				canvas#canvasapp.canvasapp
 				+audioDisplay
 block scripts
 	script(src="javascripts/script.js")

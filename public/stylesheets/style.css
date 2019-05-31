@@ -32,14 +32,14 @@ h1{
     max-width: var(--sidebar-width);
 }
 
-.canvas {
+#canvas-container {
 	border-radius: var(--canvas-border-radius);
 }
 
-#canvasapp {
+/* .canvasapp {
 	width: 100% !important;
 	height: 100% !important;
-}
+} */
 
 .hidden {
 	position: absolute;
