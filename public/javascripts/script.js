@@ -20,8 +20,6 @@ const stream = $(".canvasapp").get(0).captureStream(); // grab our canvas MediaS
 const rec = new MediaRecorder(stream); // init the recorder
 rec.ondataavailable = e => {
 	canvasVideoChunks.push(e.data);
-	console.log("ondataavailable");
-	console.log(canvasVideoChunks);
 }
 rec.onstop = e => exportVideo(new Blob(canvasVideoChunks, {type: 'video/mp4'}));
 
@@ -107,17 +105,12 @@ function audioEnded() {
 
 
 $("#file-loader-btn").click(function () {
-	console.log("click");
-
 	$("input#fileLoader").focus();
 	$("input#fileLoader").click();
 });
 
 $("input#fileLoader").change(function () {
 	var file = $("input#fileLoader")[0].files[0];
-
-	console.log("file");
-	console.log(file.type);
 
 	switch (file.type.substr(0, file.type.indexOf('/'))) {
 		case "image":
@@ -155,42 +148,37 @@ function addVideo(url) {
 		fab_video.getElement().play();
 
 	});
-
 }
 
 function fallAnimation() {
 	obj = canvas.getActiveObject();
-
+	objHeight = obj.height*obj.scaleY;
+	
 	if (!obj) {
 		return;
 	}
-	if(obj.top >= canvas.height - obj.height) {
+	if(obj.top >= canvas.height - objHeight) {
 		return;
 	}
 	obj.animate({left: obj.left+100}, {
 		duration: 1000,
 		onChange:canvas.renderAll.bind(canvas)
 	});
-	obj.animate({top: canvas.height - obj.height}, {
+	obj.animate({top: canvas.height - objHeight}, {
 		duration: 1000,
 		onChange:canvas.renderAll.bind(canvas),
 		easing: fabric.util.ease.easeOutBounce
 	});
 }
 
-function getRandomInt(min, max) {
-	min = Math.ceil(min);
-	max = Math.floor(max);
-	return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
-
 function jumpAnimation() {
 	obj = canvas.getActiveObject();
+	objHeight = obj.height*obj.scaleY;
 
 	if (!obj) {
 		return;
 	}
-	if(obj.top != canvas.height - obj.height) {
+	if(obj.top != canvas.height - objHeight) {
 		return;
 	}
 	obj.animate({top: canvas.height - 500}, {
@@ -198,7 +186,7 @@ function jumpAnimation() {
 		onChange:canvas.renderAll.bind(canvas),
 		easing: fabric.util.ease.easeOutExpo,
 		onComplete: function() {
-			obj.animate({top: canvas.height - obj.height}, {
+			obj.animate({top: canvas.height - objHeight}, {
 				duration: 1000,
 				onChange:canvas.renderAll.bind(canvas),
 				easing: fabric.util.ease.easeOutBounce
@@ -206,6 +194,31 @@ function jumpAnimation() {
 		}
 	});
 	
+}
+
+function negativeFilter() {
+	obj = canvas.getActiveObject();
+	if (!obj || obj.filters) {
+		return;
+	}
+	console.log(obj);
+	var filter = new fabric.Image.filters.Invert();
+	obj.filters.push(filter);
+	obj.applyFilters();
+	canvas.renderAll.bind(canvas);
+}
+
+function quant1Filter() {
+	obj = canvas.getActiveObject();
+	if (!obj || obj.filters) {
+		return;
+	}
+	console.log(obj);
+	
+	var filter = new fabric.Image.filters.BlackWhite();
+	obj.filters.push(filter);
+	obj.applyFilters();
+	canvas.renderAll.bind(canvas);
 }
 
 function recordCanvas() {
@@ -255,8 +268,6 @@ function exportVideo(blob) {
 
 function saveAsVideo() {
 	// $("#downloadRecordedCanvas").focus();
-	console.log($("#downloadRecordedCanvas"));
-	
 	$("#downloadRecordedCanvas")[0].click();
 }
 
@@ -265,7 +276,6 @@ function addImage(url) {
 	canvas.isDrawingMode = false;
 	fabric.Image.fromURL(url, function (img) {
 		if (img.width > canvas.width || img.height > canvas.height) {
-
 			const wFactor = img.width / canvas.width;
 			const hFactor = img.height / canvas.height;
 			const factor = Math.max(hFactor, wFactor);
@@ -291,9 +301,9 @@ function addCanvasState() {
 		updateModifications();
 	}
 }
-canvas.on('object:added', updateModifications);
-canvas.on('object:removed', updateModifications);
-canvas.on('object:modified', updateModifications);
+canvas.on('object:added', updateModifications.bind(this, 'object:added'));
+canvas.on('object:removed', updateModifications.bind(this, 'object:removed'));
+canvas.on('object:modified', updateModifications.bind(this, 'object:modified'));
 
 canvas.on('object:selected', function (obj) {
 	obj.target.bringToFront();
@@ -313,13 +323,12 @@ canvas.on('mouse:up', function (e) {
 });
 
 
-function updateModifications() {
+function updateModifications(event) {
 	if (!changingStates) {
 		state = state.slice(0, currentState + 1);
 		myjson = JSON.stringify(canvas);
 		state.push(myjson);
 		currentState++;
-		console.log(state);
 	}
 
 }
