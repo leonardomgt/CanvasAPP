@@ -5,7 +5,8 @@ var canvas = new fabric.Canvas("canvasapp", {
 	isDrawingMode: false
 });
 
-canvas.backgroundColor = "#ffffff";
+// fabric.filterBackend = new fabric.WebglFilterBackend();
+
 var state = [];
 var currentState = 0;
 var color = '#0000ff';
@@ -21,7 +22,7 @@ const rec = new MediaRecorder(stream); // init the recorder
 rec.ondataavailable = e => {
 	canvasVideoChunks.push(e.data);
 }
-rec.onstop = e => exportVideo(new Blob(canvasVideoChunks, {type: 'video/mp4'}));
+rec.onstop = e => exportVideo(new Blob(canvasVideoChunks, { type: 'video/mp4' }));
 
 fabric.util.requestAnimFrame(function render() {
 	canvas.renderAll();
@@ -29,6 +30,8 @@ fabric.util.requestAnimFrame(function render() {
 });
 // Create state 0
 state.push(JSON.stringify(canvas));
+canvas.clear().renderAll();
+canvas.backgroundColor = "#FFFFFF";
 
 // ==================================
 //           Manage color
@@ -152,71 +155,114 @@ function addVideo(url) {
 
 function fallAnimation() {
 	obj = canvas.getActiveObject();
-	objHeight = obj.height*obj.scaleY;
-	
+	objHeight = obj.height * obj.scaleY;
+
 	if (!obj) {
 		return;
 	}
-	if(obj.top >= canvas.height - objHeight) {
+	if (obj.top >= canvas.height - objHeight) {
 		return;
 	}
-	obj.animate({left: obj.left+100}, {
+	obj.animate({ left: obj.left + (canvas.height - objHeight - obj.top) / 3 }, {
 		duration: 1000,
-		onChange:canvas.renderAll.bind(canvas)
+		onChange: canvas.renderAll.bind(canvas)
 	});
-	obj.animate({top: canvas.height - objHeight}, {
+	obj.animate({ top: canvas.height - objHeight }, {
 		duration: 1000,
-		onChange:canvas.renderAll.bind(canvas),
+		onChange: canvas.renderAll.bind(canvas),
 		easing: fabric.util.ease.easeOutBounce
 	});
 }
 
 function jumpAnimation() {
 	obj = canvas.getActiveObject();
-	objHeight = obj.height*obj.scaleY;
+	objHeight = obj.height * obj.scaleY;
 
 	if (!obj) {
 		return;
 	}
-	if(obj.top != canvas.height - objHeight) {
-		return;
-	}
-	obj.animate({top: canvas.height - 500}, {
+	obj.animate({ top: 0 }, {
 		duration: 500,
-		onChange:canvas.renderAll.bind(canvas),
+		onChange: canvas.renderAll.bind(canvas),
 		easing: fabric.util.ease.easeOutExpo,
-		onComplete: function() {
-			obj.animate({top: canvas.height - objHeight}, {
+		onComplete: function () {
+			obj.animate({ top: canvas.height - objHeight }, {
 				duration: 1000,
-				onChange:canvas.renderAll.bind(canvas),
+				onChange: canvas.renderAll.bind(canvas),
 				easing: fabric.util.ease.easeOutBounce
-			}); 
+			});
 		}
 	});
-	
+
 }
 
-function negativeFilter() {
+function applyFilter(filter, prop, value) {
+	coeficient = 1;
 	obj = canvas.getActiveObject();
-	if (!obj || obj.filters) {
+	// console.log(obj);
+	if (!obj || !obj.filters) {
 		return;
 	}
-	console.log(obj);
-	var filter = new fabric.Image.filters.Invert();
-	obj.filters.push(filter);
-	obj.applyFilters();
-	canvas.renderAll.bind(canvas);
-}
 
-function quant1Filter() {
-	obj = canvas.getActiveObject();
-	if (!obj || obj.filters) {
-		return;
+	var filterToApply;
+	switch (filter) {
+		case 0:
+			filterToApply = new fabric.Image.filters.Invert();
+			break;
+		case 1:
+			filterToApply = new fabric.Image.filters.BlackWhite();
+			break;
+		case 2:
+			filterToApply = new fabric.Image.filters.Pixelate();
+			break;
+		default:
+		case 3:
+			filterToApply = new fabric.Image.filters.Blur();
+			coeficient = 0.1;
+			break;
 	}
-	console.log(obj);
-	
-	var filter = new fabric.Image.filters.BlackWhite();
-	obj.filters.push(filter);
+	console.log(filter);
+	console.log(prop);
+	console.log(value);
+
+	switch (filter) {
+		default:
+		case 0:
+		case 1:
+			if (obj.filters[filter]) {
+				delete obj.filters[filter]
+			}
+			else {
+				obj.filters[filter] = filterToApply;
+			}
+			break;
+		case 2:
+		case 3:
+			if (!obj.filters[filter])
+				obj.filters[filter] = filterToApply;
+
+			if (prop && value) {
+				if (obj.filters[filter][prop]/coeficient < 10)
+					obj.filters[filter][prop] += value*coeficient;
+				else
+					delete obj.filters[filter]
+			}
+			break;
+
+		// if (obj.filters[filter] && filter != 2 && filter != 3) {
+		// 	delete obj.filters[filter]
+		// }
+		// else {
+		// 	obj.filters[filter] = filterToApply;
+		// 	if(prop && value){
+		// 		if(value < 10)
+		// 			obj.filters[filter][prop] += value;
+		// 		else
+		// 			delete obj.filters[filter]
+		// 	}
+		// }
+	}
+
 	obj.applyFilters();
 	canvas.renderAll.bind(canvas);
 }
@@ -229,7 +275,7 @@ function recordCanvas() {
 		$("#fas_fa-video_button i").addClass("fa-video-slash")
 
 		$("#fas_fa-video_box").css('background-color', 'red');
-		
+
 		startRecording()
 	}
 	else {
@@ -237,9 +283,9 @@ function recordCanvas() {
 
 		$("#fas_fa-video_button i").removeClass("fa-video-slash")
 		$("#fas_fa-video_button i").addClass("fa-video")
-		
+
 		$("#fas_fa-video_box").css('background-color', 'orange');
-		
+
 		stopRecording()
 	}
 }
@@ -251,7 +297,7 @@ function startRecording() {
 }
 
 function stopRecording() {
-	rec.stop();	
+	rec.stop();
 }
 
 function exportVideo(blob) {
@@ -361,6 +407,8 @@ function clearCanvas() {
 	if (currentState > 0) {
 		updateModifications()
 	}
+	canvas.backgroundColor = "#ffffff";
+
 }
 
 function undo() {
@@ -383,12 +431,15 @@ function redo() {
 	}
 }
 
-function deleteObject() {
-	if (!canvas.getActiveObject()) {
-		return;
+document.body.onkeydown = function (e) {
+	if (e.keyCode == 46) {
+		deleteObject();
 	}
-
-	canvas.remove(canvas.getActiveObject());
+};
+function deleteObject() {
+	var activeObject = canvas.getActiveObjects();
+	canvas.discardActiveObject();
+	canvas.remove(...activeObject);
 }
 
 function copyPaste() {
