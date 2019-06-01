@@ -132,7 +132,7 @@ $("input#fileLoader").change(function () {
 
 function createVideoElement(url) {
 	var videoE = document.createElement('video');
-	videoE.muted = true;
+	videoE.muted = false;
 	videoE.crossOrigin = "anonymous";
 	var source = document.createElement('source');
 	source.src = url;
@@ -156,6 +156,56 @@ function addVideo(url) {
 
 	});
 
+}
+
+function fallAnimation() {
+	obj = canvas.getActiveObject();
+
+	if (!obj) {
+		return;
+	}
+	if(obj.top >= canvas.height - obj.height) {
+		return;
+	}
+	obj.animate({left: obj.left+100}, {
+		duration: 1000,
+		onChange:canvas.renderAll.bind(canvas)
+	});
+	obj.animate({top: canvas.height - obj.height}, {
+		duration: 1000,
+		onChange:canvas.renderAll.bind(canvas),
+		easing: fabric.util.ease.easeOutBounce
+	});
+}
+
+function getRandomInt(min, max) {
+	min = Math.ceil(min);
+	max = Math.floor(max);
+	return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+function jumpAnimation() {
+	obj = canvas.getActiveObject();
+
+	if (!obj) {
+		return;
+	}
+	if(obj.top != canvas.height - obj.height) {
+		return;
+	}
+	obj.animate({top: canvas.height - 500}, {
+		duration: 500,
+		onChange:canvas.renderAll.bind(canvas),
+		easing: fabric.util.ease.easeOutExpo,
+		onComplete: function() {
+			obj.animate({top: canvas.height - obj.height}, {
+				duration: 1000,
+				onChange:canvas.renderAll.bind(canvas),
+				easing: fabric.util.ease.easeOutBounce
+			}); 
+		}
+	});
+	
 }
 
 function recordCanvas() {
@@ -274,20 +324,23 @@ function updateModifications() {
 
 }
 
-function addShape(shape = 'rectangle') {
+function addTriangle() {
 	canvas.isDrawingMode = false;
-	switch (shape) {
-		case "circle":
-			obj = new fabric.Circle({ radius: 30, fill: color, top: 100, left: 100 });
-			break;
-		case "triangle":
-			obj = new fabric.Triangle({ width: 60, height: 60, fill: color, left: 100, top: 100 });
-			break;
-		default:
-		case "rectangle":
-			obj = new fabric.Rect({ width: 60, height: 60, fill: color, left: 100, top: 100 });
-			break;
-	}
+	obj = new fabric.Triangle({ width: 60, height: 60, fill: color, left: 100, top: 100 });
+	canvas.add(obj);
+	canvas.setActiveObject(obj);
+}
+
+function addRectangle() {
+	canvas.isDrawingMode = false;
+	obj = new fabric.Rect({ width: 60, height: 60, fill: color, left: 100, top: 100 });
+	canvas.add(obj);
+	canvas.setActiveObject(obj);
+}
+
+function addCircle() {
+	canvas.isDrawingMode = false;
+	obj = new fabric.Circle({ radius: 30, fill: color, top: 100, left: 100 });
 	canvas.add(obj);
 	canvas.setActiveObject(obj);
 }
